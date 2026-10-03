@@ -19,8 +19,8 @@ Environment:
   SIGN_IDENTITY   Codesigning identity (default "Developer ID Application")
   NOTARY_PROFILE  notarytool keychain profile (default "stowaway-notary")
   TAP_DIR         Homebrew tap checkout (default ~/Projects/homebrew-tap)
-  DMG_BUILDER     Styled DMG script (default ~/Projects/dmg-builder/build-dmg.sh;
-                  it drives Finder, so set "none" for a plain hdiutil DMG)
+  DMG_BUILDER     Installer-window DMG script (default ~/Projects/dmg-builder/build-dmg.sh;
+                  it drives Finder briefly; set "none" for a plain hdiutil DMG)
 EOF
 }
 
@@ -76,8 +76,8 @@ dmg_builder_problem() {
         echo "No DMG builder at $DMG_BUILDER. Set DMG_BUILDER=none for a plain hdiutil DMG."
     elif ! command -v create-dmg >/dev/null; then
         echo "$DMG_BUILDER needs create-dmg: brew install create-dmg (or set DMG_BUILDER=none)."
-    elif ! python3 -c 'import PIL' 2>/dev/null; then
-        echo "$DMG_BUILDER needs Pillow for $(python3 --version 2>&1): python3 -m pip install --user Pillow (or set DMG_BUILDER=none)."
+    elif ! xcrun --find swiftc >/dev/null 2>&1; then
+        echo "$DMG_BUILDER needs swiftc from Xcode or the Command Line Tools (or set DMG_BUILDER=none)."
     fi
 }
 
