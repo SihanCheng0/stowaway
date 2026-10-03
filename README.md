@@ -1,8 +1,9 @@
 <p align="center">
-  <img src="assets/app-icon-source.png" width="128" alt="Stowaway icon">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/logo/logo-dark.svg">
+    <img src="assets/logo/logo-light.svg" width="420" alt="Stowaway">
+  </picture>
 </p>
-
-<h1 align="center">Stowaway</h1>
 
 <p align="center">Keeps working in your bag.</p>
 
