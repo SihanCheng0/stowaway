@@ -18,7 +18,9 @@ final class SidebarSnapshotTests: XCTestCase {
         ]
         // 760pt is roughly a 13" MacBook Air's visible height minus the sidebar margins.
         for state in states {
-            for (scheme, height) in [(ColorScheme.light, 760.0), (.dark, 900.0)] {
+            let heightOverride = Double(ProcessInfo.processInfo.environment["STOWAWAY_SNAPSHOT_HEIGHT"] ?? "")
+            for (scheme, defaultHeight) in [(ColorScheme.light, 760.0), (.dark, 900.0)] {
+                let height = heightOverride ?? defaultHeight
                 let controller = AwakeController(
                     power: MockPower(),
                     monitor: MockMonitor(),
@@ -49,7 +51,7 @@ final class SidebarSnapshotTests: XCTestCase {
                     .background(scheme == .dark ? Color(white: 0.16) : Color(white: 0.94))
                     .environment(\.colorScheme, scheme)
                 let renderer = ImageRenderer(content: view)
-                renderer.scale = 2
+                renderer.scale = Double(ProcessInfo.processInfo.environment["STOWAWAY_SNAPSHOT_SCALE"] ?? "") ?? 2
                 let image = try XCTUnwrap(renderer.cgImage)
                 let png = try XCTUnwrap(NSBitmapImageRep(cgImage: image).representation(using: .png, properties: [:]))
                 let file = URL(fileURLWithPath: directory)

@@ -14,3 +14,6 @@ ExportOptions.generated.plist
 *.p12
 *.p8
 *.cer
+
+# Marketing renders (Reel, website images)
+opus-video/

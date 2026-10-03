@@ -118,7 +118,7 @@ To also render sidebar snapshots to PNGs, prefix the test command with `TEST_RUN
 Releases are ad-hoc signed and not notarized for now.
 
 **Each release:**
-1. Bump `MARKETING_VERSION` in `project.yml`, then commit and push.
+1. Bump `MARKETING_VERSION` in `project.yml` and run `xcodegen generate`. Commit `project.yml` and `Stowaway.xcodeproj`, then push.
 2. Build the DMG. This also updates the cask's `version` and `sha256` in your `homebrew-tap` checkout (`TAP_DIR`, default `~/Projects/homebrew-tap`).
    ```bash
    scripts/release.sh --unsigned
@@ -129,6 +129,14 @@ Releases are ad-hoc signed and not notarized for now.
    ```
 
 The styled DMG comes from the script set in `DMG_BUILDER`. Set `DMG_BUILDER=none` for a plain `hdiutil` DMG.
+
+**Optional: a stable signature without a developer account.** An ad-hoc signature is different for every build, so `brew upgrade` warns that Stowaway's signer changed. To avoid that, create a self-signed certificate once in Keychain Access → Certificate Assistant → Create a Certificate, with Certificate Type **Code Signing**. Open the certificate and set **Code Signing** to **Always Trust**. Then release with:
+
+```bash
+ADHOC_IDENTITY="<certificate name>" scripts/release.sh --unsigned
+```
+
+The first upgrade from an ad-hoc release may still show Homebrew's signer-changed warning once.
 
 **Switching to notarized releases** (needs the paid [Apple Developer Program](https://developer.apple.com/programs/)):
 1. Create a **Developer ID Application** certificate: Xcode → Settings → Accounts → Manage Certificates → +.

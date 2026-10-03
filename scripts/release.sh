@@ -18,6 +18,9 @@ Environment:
   TEAM_ID         Apple Developer team ID (required unless --unsigned)
   SIGN_IDENTITY   Codesigning identity (default "Developer ID Application")
   NOTARY_PROFILE  notarytool keychain profile (default "stowaway-notary")
+  ADHOC_IDENTITY  Codesigning identity for --unsigned (default "-", ad hoc). With a self-signed
+                  "Code Signing" certificate the designated requirement stays the same across
+                  releases, so brew upgrade doesn't warn that the signer changed.
   TAP_DIR         Homebrew tap checkout (default ~/Projects/homebrew-tap)
   DMG_BUILDER     Installer-window DMG script (default ~/Projects/dmg-builder/build-dmg.sh;
                   it drives Finder briefly; set "none" for a plain hdiutil DMG)
@@ -28,6 +31,7 @@ APP_NAME="Stowaway"
 TEAM_ID="${TEAM_ID:-}"
 SIGN_IDENTITY="${SIGN_IDENTITY:-Developer ID Application}"
 NOTARY_PROFILE="${NOTARY_PROFILE:-stowaway-notary}"
+ADHOC_IDENTITY="${ADHOC_IDENTITY:--}"
 TAP_DIR="${TAP_DIR:-$HOME/Projects/homebrew-tap}"
 DMG_BUILDER="${DMG_BUILDER:-$HOME/Projects/dmg-builder/build-dmg.sh}"
 
@@ -83,10 +87,23 @@ dmg_builder_problem() {
 
 preflight() {
     step "Checking release prerequisites"
-    local problems=()
-    if [ -n "$(git status --porcelain)" ]; then
-        problems+=("The working tree has uncommitted changes. Commit or stash them so the release matches a commit (see git status).")
+    local problems=() hint=""
+    if [ -z "$APP" ]; then
+        if command -v xcodegen >/dev/null; then
+            # Stowaway.xcodeproj is tracked, so regenerate it first: a stale one then shows up below.
+            xcodegen generate --quiet
+        else
+            problems+=("xcodegen not found. Install it with: brew install xcodegen")
+        fi
     fi
+    if [ -n "$(git status --porcelain)" ]; then
+        if [ -z "$APP" ]; then
+            problems+=("Stowaway.xcodeproj (or other files) changed — commit project.yml and the regenerated Stowaway.xcodeproj first (see git status).")
+        else
+            problems+=("The working tree has uncommitted changes. Commit or stash them so the release matches a commit (see git status).")
+        fi
+    fi
+    BUILD_COMMIT="$(git rev-parse HEAD)"
     if [ ! -f "$CASK" ]; then
         problems+=("No cask at $CASK. Set TAP_DIR to your homebrew-tap checkout.")
     fi
@@ -96,13 +113,22 @@ preflight() {
         problems+=("$builder_problem")
     fi
     if [ "$SIGNED" = 1 ]; then
+        local before=${#problems[@]}
         signing_problems
+        if [ ${#problems[@]} -gt "$before" ]; then
+            hint="No Apple Developer account? Release ad-hoc signed with: scripts/release.sh --unsigned"
+        fi
+    elif [ "$ADHOC_IDENTITY" != "-" ] && ! security find-identity -v -p codesigning | grep -F -- "$ADHOC_IDENTITY" >/dev/null; then
+        problems+=("No valid codesigning identity \"$ADHOC_IDENTITY\" (ADHOC_IDENTITY) in your keychain. A self-signed certificate needs Code Signing set to Always Trust in Keychain Access. Check with: security find-identity -v -p codesigning")
     fi
     if [ ${#problems[@]} -gt 0 ]; then
         local problem
         for problem in "${problems[@]}"; do
             echo "  - $problem" >&2
         done
+        if [ -n "$hint" ]; then
+            echo "$hint" >&2
+        fi
         die "Not ready to release."
     fi
 }
@@ -121,16 +147,12 @@ signing_problems() {
 }
 
 build_app() {
-    command -v xcodegen >/dev/null || die "xcodegen not found. Install it with: brew install xcodegen"
     local archive="$BUILD_DIR/$APP_NAME.xcarchive"
     local export_dir="$BUILD_DIR/export"
-    local signing=(CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM=)
+    local signing=(CODE_SIGN_STYLE=Manual "CODE_SIGN_IDENTITY=$ADHOC_IDENTITY" DEVELOPMENT_TEAM=)
     if [ "$SIGNED" = 1 ]; then
         signing=(CODE_SIGN_STYLE=Manual "CODE_SIGN_IDENTITY=$SIGN_IDENTITY" "DEVELOPMENT_TEAM=$TEAM_ID" OTHER_CODE_SIGN_FLAGS=--timestamp)
     fi
-
-    step "Generating Xcode project"
-    xcodegen generate --quiet
 
     step "Archiving $APP_NAME $VERSION"
     rm -rf "$archive" "$export_dir"
@@ -204,6 +226,16 @@ make_dmg() {
     [ -f "$DMG" ] || die "No DMG at $DMG"
 }
 
+# A fresh mount can be "Resource busy" for a moment while Spotlight or XProtect scans it.
+detach() {
+    local i
+    for i in 1 2 4 8; do
+        hdiutil detach -quiet "$1" && return 0
+        sleep "$i"
+    done
+    hdiutil detach -quiet -force "$1"
+}
+
 # create-dmg drives Finder, which could leave metadata on the bundle and break its seal.
 verify_dmg_contents() {
     step "Checking the app inside the DMG"
@@ -211,7 +243,7 @@ verify_dmg_contents() {
     mount="$(mktemp -d)"
     hdiutil attach -quiet -nobrowse -readonly -noautoopen -mountpoint "$mount" "$DMG"
     codesign --verify --deep --strict "$mount/$APP_NAME.app" || ok=0
-    hdiutil detach -quiet "$mount"
+    detach "$mount"
     rmdir "$mount" 2>/dev/null || true
     [ "$ok" = 1 ] || die "The app's signature is broken inside $DMG."
 }
@@ -305,7 +337,10 @@ if [ "$SIGNED" = 1 ]; then
     notarize_dmg
 fi
 # publish.sh tags this commit, so the tag always matches the code in the DMG.
-git rev-parse HEAD >"$COMMIT_FILE"
+if [ "$(git rev-parse HEAD)" != "$BUILD_COMMIT" ] || [ -n "$(git status --porcelain)" ]; then
+    die "HEAD or the working tree changed during the release, so $DMG may not match commit ${BUILD_COMMIT:0:12}. Re-run scripts/release.sh."
+fi
+echo "$BUILD_COMMIT" >"$COMMIT_FILE"
 
 SHA256="$(shasum -a 256 "$DMG" | awk '{ print $1 }')"
 update_cask "$SHA256"

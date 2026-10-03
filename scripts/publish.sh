@@ -75,8 +75,8 @@ This build isn't notarized by Apple yet, so macOS blocks the first launch from t
 fi
 
 if [ -f "$NOTES" ]; then
-    NOTES_ARGS=(--notes-file "$NOTES")
-    NOTES_SOURCE="$NOTES"
+    NOTES_ARGS=(--notes "$(cat "$NOTES")"$'\n\n'"$INSTALL_NOTES")
+    NOTES_SOURCE="$NOTES + install instructions"
 else
     # --notes is prepended to the notes GitHub generates from commits.
     NOTES_ARGS=(--notes "$INSTALL_NOTES" --generate-notes)
@@ -87,7 +87,7 @@ fi
 if [ "$STATE" = "new" ]; then
     FIRST_STEP="Create draft release $TAG on $REPO at commit ${COMMIT:0:12} (notes: $NOTES_SOURCE)"
 else
-    FIRST_STEP="Replace the DMG on the existing draft release $TAG"
+    FIRST_STEP="Recreate draft release $TAG on $REPO at commit ${COMMIT:0:12} (notes: $NOTES_SOURCE)"
 fi
 if [ "$NOTARIZED" = 0 ]; then
     echo "Note: $DMG is not notarized. The release notes explain the one-time Open Anyway step."
@@ -106,18 +106,19 @@ case "$answer" in
     *) echo "Cancelled."; exit 1 ;;
 esac
 
-if [ "$STATE" = "new" ]; then
-    step "Creating draft release $TAG"
-    gh release create "$TAG" "$DMG" \
-        --repo "$REPO" \
-        --draft \
-        --title "$APP_NAME $VERSION" \
-        --target "$COMMIT" \
-        "${NOTES_ARGS[@]}"
-else
-    step "Uploading the DMG to draft release $TAG"
-    gh release upload "$TAG" "$DMG" --repo "$REPO" --clobber
+if [ "$STATE" = "draft" ]; then
+    # A draft has no tag yet. Recreating it, rather than replacing the DMG, also updates its
+    # target commit and notes.
+    step "Deleting the existing draft release $TAG"
+    gh release delete "$TAG" --repo "$REPO" --yes
 fi
+step "Creating draft release $TAG"
+gh release create "$TAG" "$DMG" \
+    --repo "$REPO" \
+    --draft \
+    --title "$APP_NAME $VERSION" \
+    --target "$COMMIT" \
+    "${NOTES_ARGS[@]}"
 
 step "Pushing the cask"
 if [ -n "$(git -C "$TAP_DIR" status --porcelain -- Casks/stowaway.rb)" ]; then
