@@ -11,8 +11,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // Unit tests run inside the app; keep them away from the real power settings.
         guard ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] == nil else { return }
 
-        let controller = AwakeController(power: PowerManager(), monitor: SystemMonitor(), authorizer: SudoersHelper())
+        let controller = AwakeController(
+            power: PowerManager(),
+            monitor: SystemMonitor(),
+            authorizer: SudoersHelper(),
+            checkpoint: CheckpointHook()
+        )
         controller.start()
+        ClaudeHookInstaller().updateScriptIfInstalled()
         let updates = UpdateChecker()
         updates.start()
         let sidebar = SidebarController(controller: controller, updates: updates)

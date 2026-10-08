@@ -17,6 +17,9 @@ struct SystemSnapshot: Equatable {
     var thermal: ProcessInfo.ThermalState
     var lidClosed: Bool
     var externalDisplay: Bool
+
+    /// macOS sleeps as soon as sleep is allowed again: lid closed, no external display.
+    var wouldSleep: Bool { lidClosed && !externalDisplay }
 }
 
 protocol SystemMonitoring {

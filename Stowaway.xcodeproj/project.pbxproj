@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		06EAEA500F103040A3E673F4 /* SidebarSnapshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F4DCEB2B30222373D8FA1CE /* SidebarSnapshotTests.swift */; };
 		0AB1ECB7D216CC188A2AE220 /* SudoersRuleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83DA3A5517C51C9EBD97E49C /* SudoersRuleTests.swift */; };
+		23910437A66D0039F5D16A34 /* CheckpointPolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7691560AAD93A7911BD2167A /* CheckpointPolicyTests.swift */; };
+		35334B61AD1D59134FFCD3F4 /* ClaudeHookInstallerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50982F17E5A5842D8A5A3A41 /* ClaudeHookInstallerTests.swift */; };
 		45261B081B125C5A08C93821 /* SudoersHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16C6DA683A9882FB9CE9B33B /* SudoersHelper.swift */; };
 		470CD9788C34088A87534CD0 /* AwakeDuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55FF39637434DBA47C9EBC0F /* AwakeDuration.swift */; };
 		4C92D90C038D2D518E1510D8 /* Shell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371CEA061EAD7451F0C59F33 /* Shell.swift */; };
@@ -16,6 +18,7 @@
 		5D541933F129F8EA83766345 /* AwakeController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09938669DF16AFAC18588F43 /* AwakeController.swift */; };
 		67A2662A8F18A1E4BEBC47D9 /* AwakeDurationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CFB4267DA0450FEA41ECC28 /* AwakeDurationTests.swift */; };
 		7843F1E8572B0AFE3ADA5A8D /* SidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32942313920E6D7D87860BFA /* SidebarView.swift */; };
+		7C4C757CCEAAD991AE13C516 /* ClaudeHookInstaller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D8262C3AEAABDB8C2F59A25 /* ClaudeHookInstaller.swift */; };
 		87FB21552435123C90D242C1 /* StatusItemController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E121577D67CE6721E34DC0BA /* StatusItemController.swift */; };
 		9646C11C66D05AF9CE689A1C /* UpdateChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF0D3687D5D6EBF5C9C01B4 /* UpdateChecker.swift */; };
 		9D02522A9DCA31B2A7355A65 /* PowerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C46667944757B1786AEBEFA /* PowerManager.swift */; };
@@ -23,6 +26,7 @@
 		9F8937F2ADF9CE460E8C186D /* SafetyPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = B630C246EFC96BF81790C19D /* SafetyPolicy.swift */; };
 		A95AF0C828C494D83B98E1C8 /* PowerOrb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E5199CAD890AFFDB45E3A57 /* PowerOrb.swift */; };
 		AD37810D498C473A8BBCD68D /* Mocks.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9FA594F572B10201A4C5FE3 /* Mocks.swift */; };
+		B5E169F71D278A7158C812A7 /* CheckpointHookTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5043FF94C7A8D26628494B3F /* CheckpointHookTests.swift */; };
 		B8EFF45305660B9A5A142762 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D7B30910EB0A877925EFEB6 /* Theme.swift */; };
 		C5DEFC569C8D150313C5ACE4 /* SafetyPolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D16DC14ECD6C98951898501C /* SafetyPolicyTests.swift */; };
 		C7FD8BC7191C209CD555860B /* PmsetParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72160E76DE528225FB0D6CC /* PmsetParserTests.swift */; };
@@ -30,7 +34,9 @@
 		DCFA7715EB680118FC841995 /* StowawayApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00EFDE45BA79D5E9593F2890 /* StowawayApp.swift */; };
 		E2503DDD7AEF7A02F5AFDCBF /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65A8FCA9D3AE1E928C068163 /* AppDelegate.swift */; };
 		E66C92771950997D8599367D /* Controls.swift in Sources */ = {isa = PBXBuildFile; fileRef = A784CDE99020BFA27F9EAD96 /* Controls.swift */; };
+		E8BC5F032AEE9EDF91810179 /* CheckpointHook.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1227D036BB64F76F66DB232C /* CheckpointHook.swift */; };
 		E99F114AD92C7F7706803307 /* AwakeControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B04856BB3ACAFFDA6F63176 /* AwakeControllerTests.swift */; };
+		EE97327E2D1CA1262CEA8D37 /* CheckpointPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 630F63601D36C1850339E0B4 /* CheckpointPolicy.swift */; };
 		F69AB172D2EE622EAA886E4A /* LoginItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B71EE0B499A9D5AEADF64BA /* LoginItem.swift */; };
 		FAFDEE7C4EDB41DE76FA6AD3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 28A6F44CA624049F833815FE /* Assets.xcassets */; };
 /* End PBXBuildFile section */
@@ -49,7 +55,9 @@
 		00EFDE45BA79D5E9593F2890 /* StowawayApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StowawayApp.swift; sourceTree = "<group>"; };
 		09938669DF16AFAC18588F43 /* AwakeController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AwakeController.swift; sourceTree = "<group>"; };
 		0C46667944757B1786AEBEFA /* PowerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PowerManager.swift; sourceTree = "<group>"; };
+		0D8262C3AEAABDB8C2F59A25 /* ClaudeHookInstaller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeHookInstaller.swift; sourceTree = "<group>"; };
 		0F4DCEB2B30222373D8FA1CE /* SidebarSnapshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarSnapshotTests.swift; sourceTree = "<group>"; };
+		1227D036BB64F76F66DB232C /* CheckpointHook.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckpointHook.swift; sourceTree = "<group>"; };
 		16C6DA683A9882FB9CE9B33B /* SudoersHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SudoersHelper.swift; sourceTree = "<group>"; };
 		179A3481B5132BF6AFF5C9D1 /* UpdateCheckerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateCheckerTests.swift; sourceTree = "<group>"; };
 		1F6FB5AC4C597BF31C6808D8 /* StowawayTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StowawayTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -60,9 +68,13 @@
 		3B71EE0B499A9D5AEADF64BA /* LoginItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginItem.swift; sourceTree = "<group>"; };
 		3D7B30910EB0A877925EFEB6 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		3E5199CAD890AFFDB45E3A57 /* PowerOrb.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PowerOrb.swift; sourceTree = "<group>"; };
+		5043FF94C7A8D26628494B3F /* CheckpointHookTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckpointHookTests.swift; sourceTree = "<group>"; };
+		50982F17E5A5842D8A5A3A41 /* ClaudeHookInstallerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeHookInstallerTests.swift; sourceTree = "<group>"; };
 		55FF39637434DBA47C9EBC0F /* AwakeDuration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AwakeDuration.swift; sourceTree = "<group>"; };
+		630F63601D36C1850339E0B4 /* CheckpointPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckpointPolicy.swift; sourceTree = "<group>"; };
 		65A8FCA9D3AE1E928C068163 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		704DA9B56A39FFE260A59829 /* SystemMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemMonitor.swift; sourceTree = "<group>"; };
+		7691560AAD93A7911BD2167A /* CheckpointPolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckpointPolicyTests.swift; sourceTree = "<group>"; };
 		7DF0D3687D5D6EBF5C9C01B4 /* UpdateChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateChecker.swift; sourceTree = "<group>"; };
 		80EB55091E616E27C59F2E86 /* SidebarPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarPanel.swift; sourceTree = "<group>"; };
 		83DA3A5517C51C9EBD97E49C /* SudoersRuleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SudoersRuleTests.swift; sourceTree = "<group>"; };
@@ -121,6 +133,7 @@
 			children = (
 				09938669DF16AFAC18588F43 /* AwakeController.swift */,
 				55FF39637434DBA47C9EBC0F /* AwakeDuration.swift */,
+				630F63601D36C1850339E0B4 /* CheckpointPolicy.swift */,
 				B630C246EFC96BF81790C19D /* SafetyPolicy.swift */,
 			);
 			path = Models;
@@ -131,6 +144,9 @@
 			children = (
 				2B04856BB3ACAFFDA6F63176 /* AwakeControllerTests.swift */,
 				8CFB4267DA0450FEA41ECC28 /* AwakeDurationTests.swift */,
+				5043FF94C7A8D26628494B3F /* CheckpointHookTests.swift */,
+				7691560AAD93A7911BD2167A /* CheckpointPolicyTests.swift */,
+				50982F17E5A5842D8A5A3A41 /* ClaudeHookInstallerTests.swift */,
 				C9FA594F572B10201A4C5FE3 /* Mocks.swift */,
 				D72160E76DE528225FB0D6CC /* PmsetParserTests.swift */,
 				D16DC14ECD6C98951898501C /* SafetyPolicyTests.swift */,
@@ -144,6 +160,8 @@
 		84CF605CCF56AB3816B03CD9 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				1227D036BB64F76F66DB232C /* CheckpointHook.swift */,
+				0D8262C3AEAABDB8C2F59A25 /* ClaudeHookInstaller.swift */,
 				3B71EE0B499A9D5AEADF64BA /* LoginItem.swift */,
 				0C46667944757B1786AEBEFA /* PowerManager.swift */,
 				371CEA061EAD7451F0C59F33 /* Shell.swift */,
@@ -265,6 +283,9 @@
 			files = (
 				E99F114AD92C7F7706803307 /* AwakeControllerTests.swift in Sources */,
 				67A2662A8F18A1E4BEBC47D9 /* AwakeDurationTests.swift in Sources */,
+				B5E169F71D278A7158C812A7 /* CheckpointHookTests.swift in Sources */,
+				23910437A66D0039F5D16A34 /* CheckpointPolicyTests.swift in Sources */,
+				35334B61AD1D59134FFCD3F4 /* ClaudeHookInstallerTests.swift in Sources */,
 				AD37810D498C473A8BBCD68D /* Mocks.swift in Sources */,
 				C7FD8BC7191C209CD555860B /* PmsetParserTests.swift in Sources */,
 				C5DEFC569C8D150313C5ACE4 /* SafetyPolicyTests.swift in Sources */,
@@ -281,6 +302,9 @@
 				E2503DDD7AEF7A02F5AFDCBF /* AppDelegate.swift in Sources */,
 				5D541933F129F8EA83766345 /* AwakeController.swift in Sources */,
 				470CD9788C34088A87534CD0 /* AwakeDuration.swift in Sources */,
+				E8BC5F032AEE9EDF91810179 /* CheckpointHook.swift in Sources */,
+				EE97327E2D1CA1262CEA8D37 /* CheckpointPolicy.swift in Sources */,
+				7C4C757CCEAAD991AE13C516 /* ClaudeHookInstaller.swift in Sources */,
 				E66C92771950997D8599367D /* Controls.swift in Sources */,
 				F69AB172D2EE622EAA886E4A /* LoginItem.swift in Sources */,
 				9D02522A9DCA31B2A7355A65 /* PowerManager.swift in Sources */,
@@ -400,7 +424,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 1.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.sihan.stowaway;
 				SDKROOT = macosx;
 				SWIFT_VERSION = 5.9;
@@ -442,7 +466,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 1.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.sihan.stowaway;
 				SDKROOT = macosx;
 				SWIFT_VERSION = 5.9;

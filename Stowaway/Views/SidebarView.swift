@@ -6,6 +6,8 @@ struct SidebarView: View {
     @ObservedObject var updates: UpdateChecker
     @State private var launchAtLogin = LoginItem.isEnabled
     @State private var copiedUpgradeCommand = false
+    @State private var claudeHookInstalled = ClaudeHookInstaller().isInstalled
+    @State private var addedClaudeHook = false
 
     var body: some View {
         // Small screens (or the extra setup card) get a tighter layout instead of clipping.
@@ -21,6 +23,10 @@ struct SidebarView: View {
         .animation(.spring(response: 0.4, dampingFraction: 0.85), value: controller.isActive)
         .animation(.easeInOut(duration: 0.2), value: controller.isAuthorized)
         .animation(.easeInOut(duration: 0.2), value: updates.available)
+        .onChange(of: presentation.isVisible) { visible in
+            // Pick up a hook added or removed by hand since the sidebar was last open.
+            if visible, !addedClaudeHook { claudeHookInstalled = ClaudeHookInstaller().isInstalled }
+        }
     }
 
     private func content(compact: Bool) -> some View {
@@ -83,7 +89,7 @@ struct SidebarView: View {
             )
 
             VStack(spacing: 6) {
-                Text(controller.isActive ? "Awake · lid can close" : "Sleeps normally")
+                Text(heroLabel)
                     .textCase(.uppercase)
                     .font(.system(size: 10, weight: .semibold))
                     .tracking(1.4)
@@ -97,9 +103,22 @@ struct SidebarView: View {
         .frame(maxWidth: .infinity)
     }
 
+    private var heroLabel: String {
+        if controller.pendingSleep != nil { return "Sleeping soon" }
+        return controller.isActive ? "Awake · lid can close" : "Sleeps normally"
+    }
+
     @ViewBuilder
     private var heroDetail: some View {
-        if controller.isActive, let remaining = controller.remaining, let endDate = controller.endDate {
+        if let pending = controller.pendingSleep, let countdown = controller.sleepCountdown {
+            Text(Countdown.clock(countdown))
+                .font(.system(size: 34, weight: .light, design: .rounded))
+                .monospacedDigit()
+                .contentTransition(.numericText(countsDown: true))
+            Text("\(pending.reason.summary.capitalizedFirst) · checkpointing")
+                .font(.system(size: 11))
+                .foregroundStyle(.secondary)
+        } else if controller.isActive, let remaining = controller.remaining, let endDate = controller.endDate {
             Text(Countdown.clock(remaining))
                 .font(.system(size: 34, weight: .light, design: .rounded))
                 .monospacedDigit()
@@ -138,12 +157,10 @@ struct SidebarView: View {
                 value: controller.system.thermal.label,
                 tint: controller.system.thermal.tint
             )
-            StatRow(
-                symbol: "lock.shield",
-                title: "Authorization",
-                value: controller.isAuthorized ? "Ready" : "Needed",
-                tint: controller.isAuthorized ? .secondary : .ember
-            )
+            // While it's missing, the setup card above says so.
+            if controller.isAuthorized {
+                StatRow(symbol: "lock.shield", title: "Authorization", value: "Ready")
+            }
         }
     }
 
@@ -160,6 +177,12 @@ struct SidebarView: View {
             }
             .padding(.vertical, 4)
             SettingToggle(symbol: "thermometer.high", title: "Stop if Mac runs hot", isOn: $controller.thermalGuard)
+            SettingToggle(symbol: "square.and.arrow.down", title: "Checkpoint before sleep", isOn: $controller.checkpointBeforeSleep)
+                .help("Before a safeguard puts a closed Mac to sleep, Stowaway waits up to a minute so agents can save their work")
+            if showsClaudeHookButton {
+                claudeHookButton
+                    .transition(.opacity)
+            }
             SettingToggle(symbol: "sunrise", title: "Launch at login", isOn: Binding(
                 get: { launchAtLogin },
                 set: { enabled in
@@ -197,6 +220,47 @@ struct SidebarView: View {
             .foregroundStyle(.secondary)
         }
         .font(.system(size: 11))
+    }
+
+    /// One setup step at a time: offered after authorization, until the hook is installed.
+    private var showsClaudeHookButton: Bool {
+        guard controller.isAuthorized, controller.checkpointBeforeSleep else { return false }
+        return addedClaudeHook || (!claudeHookInstalled && ClaudeHookInstaller().isClaudeCodePresent)
+    }
+
+    /// Confirms briefly after installing, then goes away.
+    private var claudeHookButton: some View {
+        Button(action: addClaudeHook) {
+            Label(
+                addedClaudeHook ? "Added to Claude Code" : "Add to Claude Code",
+                systemImage: addedClaudeHook ? "checkmark" : "plus.circle"
+            )
+            .font(.system(size: 11, weight: .medium))
+            .foregroundStyle(addedClaudeHook ? Color.secondary : Color.ember)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .disabled(addedClaudeHook)
+        .padding(.leading, 28)
+        .padding(.bottom, 4)
+        .help("Adds a hook to ~/.claude/settings.json that asks Claude Code sessions to checkpoint before the Mac sleeps")
+    }
+
+    private func addClaudeHook() {
+        do {
+            try ClaudeHookInstaller().install()
+            claudeHookInstalled = true
+            addedClaudeHook = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+                withAnimation(.easeInOut(duration: 0.2)) { addedClaudeHook = false }
+            }
+        } catch ClaudeHookInstaller.InstallError.unreadableSettings(let snippet) {
+            NSPasteboard.general.clearContents()
+            NSPasteboard.general.setString(snippet, forType: .string)
+            controller.notice = ClaudeHookInstaller.InstallError.unreadableSettings(snippet: snippet).localizedDescription
+        } catch {
+            controller.notice = "Couldn't add the Claude Code hook: \(error.localizedDescription)"
+        }
     }
 
     /// Lives in the header so it never adds height to a tight layout.
@@ -251,6 +315,10 @@ struct SidebarView: View {
         default: return "battery.0"
         }
     }
+}
+
+private extension String {
+    var capitalizedFirst: String { prefix(1).uppercased() + dropFirst() }
 }
 
 private extension ProcessInfo.ThermalState {

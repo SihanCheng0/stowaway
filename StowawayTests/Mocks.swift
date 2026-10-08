@@ -48,6 +48,14 @@ final class MockAuthorizer: Authorizing {
     func uninstall() throws { installed = false }
 }
 
+final class MockCheckpoint: CheckpointHooking {
+    private(set) var begun: [PendingSleep] = []
+    private(set) var finishCount = 0
+
+    func begin(_ pending: PendingSleep, system: SystemSnapshot) { begun.append(pending) }
+    func finish() { finishCount += 1 }
+}
+
 extension SystemSnapshot {
     static let healthy = SystemSnapshot(
         battery: BatteryInfo(percent: 82, onBattery: true, charging: false),

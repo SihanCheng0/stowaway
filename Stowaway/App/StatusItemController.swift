@@ -42,9 +42,11 @@ final class StatusItemController: NSObject {
     private func render() {
         guard let button = statusItem.button else { return }
 
-        let symbol = controller.isActive ? "cup.and.saucer.fill" : "moon.zzz"
+        let checkpointing = controller.sleepCountdown != nil
+        let symbol = checkpointing ? "hourglass" : controller.isActive ? "cup.and.saucer.fill" : "moon.zzz"
         if symbol != renderedSymbol {
-            let description = controller.isActive ? "Stowaway: staying awake" : "Stowaway: normal sleep"
+            let description = checkpointing ? "Stowaway: sleeping soon"
+                : controller.isActive ? "Stowaway: staying awake" : "Stowaway: normal sleep"
             let image = NSImage(systemSymbolName: symbol, accessibilityDescription: description)?
                 .withSymbolConfiguration(NSImage.SymbolConfiguration(pointSize: 13, weight: .regular))
             image?.isTemplate = true
@@ -52,7 +54,14 @@ final class StatusItemController: NSObject {
             renderedSymbol = symbol
         }
 
-        let title = controller.isActive ? controller.remaining.map { " " + Countdown.compact($0) } ?? "" : ""
+        let title: String
+        if let countdown = controller.sleepCountdown {
+            title = " " + Countdown.clock(countdown)
+        } else if controller.isActive {
+            title = controller.remaining.map { " " + Countdown.compact($0) } ?? ""
+        } else {
+            title = ""
+        }
         if button.title != title {
             button.title = title
         }

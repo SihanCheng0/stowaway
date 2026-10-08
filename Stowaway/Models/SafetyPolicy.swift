@@ -16,6 +16,18 @@ enum EndReason: Equatable {
         }
     }
 
+    /// Stable machine-readable name, used by checkpoint hooks.
+    var code: String {
+        switch self {
+        case .manual: return "manual"
+        case .timerFinished: return "timer"
+        case .lowBattery: return "battery"
+        case .thermal: return "heat"
+        case .recovered: return "recovered"
+        case .quit: return "quit"
+        }
+    }
+
     var summary: String {
         switch self {
         case .manual: return "turned off"

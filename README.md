@@ -27,15 +27,65 @@ Stowaway is a tiny menu bar app that keeps your MacBook awake with the lid close
 - **Auto-off timer.** Choose 30m, 1h, 2h, 4h or no limit. You can extend a running session by 30 minutes.
 - **Backpack safeguards.**
   - Normal sleep comes back automatically when the timer ends, when the battery reaches your floor (20% by default), or when macOS reports the Mac is running hot.
-  - If the lid is closed when a safeguard trips, the Mac goes to sleep right away.
+  - If the lid is closed when a safeguard trips, the Mac goes to sleep, after a short [checkpoint window](#checkpoint-before-sleep) for your agents.
 - **Never stuck awake.**
   - Quitting Stowaway, logging out or shutting down restores normal sleep.
   - After a crash, the next launch restores it.
+- **Checkpoint before sleep.** Before a safeguard puts a closed Mac to sleep, Stowaway gives your agents up to a minute to save their work. One click adds a Claude Code hook that tells each session.
 - **Glanceable.**
   - The menu bar icon shows a moon (🌙) when idle. While Stowaway is keeping the Mac awake, it shows a cup (☕) and the time left.
   - Left-click the icon to open the sidebar. Right-click it to toggle directly.
 
 > **Heat:** a closed laptop in a bag can get warm. Leave **Stop if Mac runs hot** on. It ends the session as soon as macOS reports a serious thermal state.
+
+## Checkpoint before sleep
+
+When a safeguard is about to put a closed Mac to sleep, Stowaway first keeps it awake a little longer so your agents can save their work:
+
+- **60 seconds** when the timer ends or the battery reaches your floor
+- **20 seconds** if the Mac is hot
+- **no wait** if it's critically hot
+
+During that window Stowaway:
+- writes `~/.config/stowaway/sleep-pending.json` (reason, deadline and battery), and deletes it when the window ends.
+- runs `~/.config/stowaway/before-sleep`, if you've created that script and made it executable.
+
+The menu bar shows the countdown. If you open the lid, the window ends and the Mac doesn't sleep. If you plug in the charger or extend the timer, the session keeps going. It's on by default. Switch it off under **Safeguards**.
+
+### Claude Code
+
+Click **Add to Claude Code** under the toggle. Stowaway adds a hook to `~/.claude/settings.json` and keeps your old file as `settings.json.stowaway-backup`.
+
+- **What the hook does:** after each tool call, it checks whether sleep is coming. If it is, it tells that session once to finish up, snapshot uncommitted work, write a short note of what's done and what's next, and stop. The rest of the time it prints nothing.
+- **Long commands:** an agent in the middle of one hears about it when the command finishes.
+- **Settings:** if `settings.json` isn't valid JSON, Stowaway leaves it alone and copies the hook to your clipboard instead. If you use `CLAUDE_CONFIG_DIR`, paste the hook into that folder's `settings.json`.
+
+### Your own script
+
+`before-sleep` runs as you, in a login shell. It gets these environment variables:
+
+| Variable | Value |
+|-|-|
+| `STOWAWAY_REASON` | `timer`, `battery` or `heat` |
+| `STOWAWAY_SUMMARY` | a readable reason, such as `battery at 19%` |
+| `STOWAWAY_DEADLINE` | when the Mac sleeps (Unix time) |
+| `STOWAWAY_SECONDS` | seconds until then |
+| `STOWAWAY_LID` | `closed` or `open` |
+| `STOWAWAY_BATTERY` | battery percentage |
+
+Stowaway stops the script at the deadline. Its output goes to `~/Library/Logs/Stowaway/before-sleep.log`. This example snapshots uncommitted changes in every repo under `~/Projects`, without touching your files:
+
+```sh
+#!/bin/sh
+# ~/.config/stowaway/before-sleep
+for repo in "$HOME"/Projects/*/; do
+  cd "$repo" && git rev-parse --is-inside-work-tree >/dev/null 2>&1 || continue
+  stash=$(git stash create) && [ -n "$stash" ] &&
+    git stash store -m "stowaway: $STOWAWAY_SUMMARY" "$stash"
+done
+```
+
+Make it executable with `chmod +x ~/.config/stowaway/before-sleep`. To get a snapshot back, use `git stash list` and `git stash apply`.
 
 ## Install
 
@@ -63,6 +113,7 @@ macOS always sleeps when the lid closes, unless an external display is attached.
 | Lid open or closed | IORegistry `IOPMrootDomain` → `AppleClamshellState` |
 | Heat | `ProcessInfo.thermalState` (stops at *serious*) |
 | Sleep right away after an auto-stop | `pmset sleepnow` (no root needed) |
+| Warn agents first | `~/.config/stowaway/sleep-pending.json`, read by a Claude Code `PostToolUse` hook |
 
 This is also why Stowaway isn't on the Mac App Store. Sandboxed apps can't run anything as root.
 
@@ -95,8 +146,9 @@ Stowaway collects nothing. Its only network request is a daily check of `api.git
   ```bash
   brew uninstall --zap --cask stowaway
   ```
-  `--zap` also removes the sudoers rule and Stowaway's preferences.
+  `--zap` also removes the sudoers rule, Stowaway's preferences and `~/.config/stowaway`.
 - **Manual install:** click **Remove authorization**, quit Stowaway, then move it to the Trash.
+- **Claude Code hook:** remove Stowaway's entry from `hooks.PostToolUse` in `~/.claude/settings.json`. A leftover entry is harmless: it does nothing once `~/.config/stowaway` is gone.
 
 ## Build from source
 

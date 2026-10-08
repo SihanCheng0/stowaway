@@ -10,11 +10,12 @@ final class SidebarSnapshotTests: XCTestCase {
         guard let directory = ProcessInfo.processInfo.environment["STOWAWAY_SNAPSHOT_DIR"] else {
             throw XCTSkip("Set STOWAWAY_SNAPSHOT_DIR to render snapshots")
         }
-        let states: [(name: String, authorized: Bool, active: Bool, update: Bool)] = [
-            ("setup", false, false, false),
-            ("idle", true, false, false),
-            ("active", true, true, false),
-            ("update", true, false, true),
+        let states: [(name: String, authorized: Bool, active: Bool, update: Bool, checkpoint: Bool)] = [
+            ("setup", false, false, false, false),
+            ("idle", true, false, false, false),
+            ("active", true, true, false, false),
+            ("update", true, false, true, false),
+            ("checkpoint", true, true, false, true),
         ]
         // 760pt is roughly a 13" MacBook Air's visible height minus the sidebar margins.
         for state in states {
@@ -23,12 +24,20 @@ final class SidebarSnapshotTests: XCTestCase {
                 let height = heightOverride ?? defaultHeight
                 let controller = AwakeController(
                     power: MockPower(),
-                    monitor: MockMonitor(),
+                    monitor: MockMonitor(state.checkpoint ? SystemSnapshot.healthy.with { $0.lidClosed = true } : .healthy),
                     authorizer: MockAuthorizer(installed: state.authorized),
+                    checkpoint: MockCheckpoint(),
                     defaults: makeTestDefaults()
                 )
                 controller.syncOnLaunch()
-                if state.active {
+                if state.checkpoint {
+                    // A timer that just ran out with the lid closed: 42 s left to checkpoint.
+                    controller.select(.thirtyMinutes)
+                    controller.enable()
+                    let end = try XCTUnwrap(controller.endDate)
+                    controller.tick(at: end.addingTimeInterval(1))
+                    controller.tick(at: end.addingTimeInterval(19))
+                } else if state.active {
                     controller.enable()
                     controller.tick(at: Date().addingTimeInterval(1273))
                 }
